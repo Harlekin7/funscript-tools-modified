@@ -12,6 +12,7 @@ from ui.parameter_tabs import ParameterTabs
 from ui.conversion_tabs import ConversionTabs
 from ui.custom_events_dialog import CustomEventsDialog
 from ui.custom_events_builder import CustomEventsBuilderDialog
+from ui.output_preview_window import OutputPreviewWindow
 
 
 class MainWindow:
@@ -101,6 +102,8 @@ class MainWindow:
         ttk.Button(buttons_frame, text="Custom Event Builder (NEW)", command=self.open_custom_events_builder).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(buttons_frame, text="Custom Events (Classic)", command=self.open_custom_events_dialog).pack(side=tk.LEFT, padx=(0, 10))
 
+        ttk.Button(buttons_frame, text="Output Preview", command=self.open_preview_window).pack(side=tk.LEFT, padx=(0, 10))
+
         ttk.Button(buttons_frame, text="Save Config", command=self.save_config).pack(side=tk.LEFT, padx=(0, 10))
         ttk.Button(buttons_frame, text="Reset to Defaults", command=self.reset_config).pack(side=tk.LEFT)
 
@@ -124,6 +127,25 @@ class MainWindow:
         dialog = CustomEventsDialog(self.root, self.current_config)
         self.root.wait_window(dialog)
 
+    def open_preview_window(self):
+        """Open the output preview window."""
+        # Check if preview window already exists and is open
+        if hasattr(self, 'preview_window') and self.preview_window.winfo_exists():
+            self.preview_window.lift()  # Bring to front if already open
+            self.preview_window.focus_force()
+        else:
+            # Create new preview window
+            self.preview_window = OutputPreviewWindow(
+                self.root,
+                self.current_config,
+                self._get_updated_config  # Callback to get latest config from UI
+            )
+
+    def _get_updated_config(self):
+        """Get configuration updated with current UI values (for preview window)."""
+        # Update config from UI before returning
+        self.update_config_from_ui()
+        return self.current_config
 
     def on_mode_change(self, mode):
         """Called when positional axis mode changes."""
